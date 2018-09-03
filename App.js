@@ -8,10 +8,13 @@
 
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View,Button,TouchableOpacity} from 'react-native';
+import {connect} from 'react-redux';
+import {calculations,showPressed,removeNum,addOperand} from './actions';
+
 
 
 type Props = {};
-export default class App extends Component<Props> {
+class App extends Component<Props> {
   constructor(){
     super()
     this.state={
@@ -72,20 +75,29 @@ export default class App extends Component<Props> {
     }
   }
   render() {
+    console.log(this.props)
     let rows=[]
     let nums=[[1,2,3],[4,5,6],[7,8,9],['.',0,'=']]
     for(let i=0; i< 4;i++){
       let row=[]
       for(let j=0; j<3;j++){
-        row.push(<TouchableOpacity onPress={()=> this.buttonPressed(nums[i][j])} style={styles.btn}>
+        row.push(<TouchableOpacity key={nums[i][j]} onPress={()=> {
+          
+          if(nums[i][j]=='='){this.props.calculations(this.props.props.resultText)}
+           else if (nums[i][j]!='='){this.props.showPressed(nums[i][j])}}
+          } style={styles.btn}>
           <Text style={styles.btnTxt}>{nums[i][j]}</Text>
         </TouchableOpacity>)
       }
-      rows.push(<View style={styles.row}>{row}</View>)
+      rows.push(<View key={i} style={styles.row}>{row}</View>)
     }
     let ops=[]
     for(let i=0;i<5;i++){
-      ops.push(<TouchableOpacity onPress={()=> this.operate(this.operations[i])} style={styles.btn}>
+      ops.push(<TouchableOpacity key={this.operations[i]} onPress={()=> {
+        if(this.operations[i]=='Del'){this.props.removeNum(this.props.props.resultText)}
+        else if(this.operations[i]!='Del'){this.props.addOperand(this.operations[i])}
+        // this.operate(this.operations[i])
+        }} style={styles.btn}>
         <Text style={[styles.btnTxt, styles.white]}>{this.operations[i]}</Text>
       </TouchableOpacity>)
     }
@@ -94,10 +106,10 @@ export default class App extends Component<Props> {
 
       <View style={styles.container}>
         <View style={styles.result}>
-          <Text style={styles.resultText}>{this.state.resultText}</Text>
+          <Text style={styles.resultText}>{this.props.props.resultText}</Text>
         </View>
         <View style={styles.calculation}>
-          <Text style={styles.calculationText}>{this.state.calculationText}</Text>
+          <Text style={styles.calculationText}>{this.props.props.calculationText}</Text>
         </View>
         <View style={styles.buttons}>
           <View style={styles.numbers}>
@@ -182,3 +194,9 @@ const styles = StyleSheet.create({
   
 
 });
+function mapStateToProps(state){
+  return{
+    props:state 
+  }
+}
+export default connect(mapStateToProps, {calculations,showPressed,removeNum,addOperand})(App);
